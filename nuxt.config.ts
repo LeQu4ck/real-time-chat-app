@@ -10,10 +10,9 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@primevue/nuxt-module',
     'nuxt-mongoose'
-
   ],
   mongoose: {
-    uri: process.env.MONGODB_URI,
+    uri: import.meta.env.MONGODB_URI,
     options: {},
     modelsDir: 'models',
     devtools: true,

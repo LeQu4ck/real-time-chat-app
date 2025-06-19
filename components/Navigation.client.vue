@@ -90,8 +90,9 @@
 <script setup>
 import Dialog from "primevue/dialog";
 import { ref } from "vue";
-import { user, useAuth } from "~/composables/useAuth";
+import { useAuth } from "~/composables/useAuth";
 
+const { user, logOut } = useAuth();
 
 const menuItems = ref([]);
 
@@ -200,6 +201,7 @@ const logInAsync = async () => {
     const result = await $fetch("http://localhost:3000/api/auth/login", {
       method: "POST",
       body: payload,
+      credentials: "include",
     });
 
     email.value = "";
@@ -221,7 +223,7 @@ const logInAsync = async () => {
 
 const logOutAsync = async () => {
   try {
-    await useAuth().logOut();
+    await logOut();
 
     buildMenu();
   } catch (error) {

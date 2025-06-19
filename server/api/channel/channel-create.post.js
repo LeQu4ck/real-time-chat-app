@@ -1,13 +1,20 @@
 import { ChannelSchema } from "~/server/models/channel";
+import { ChannelTextSchema } from "~/server/models/channel-text";
+import { ChannelMembershipSchema } from "~/server/models/channel-membership";
+import { getCookie } from "h3";
+import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
-  const io = event.context.io;
+  const token = getCookie(event, "token");
+  if (!token) {
+    return createError({ statusCode: 401, message: "Not authenticated" });
+  }
 
-  if (!io) {
-    return {
-      statusCode: 500,
-      message: "Socket.io is not initialized",
-    };
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return createError({ statusCode: 403, message: "Invalid token" });
   }
 
   const body = await readBody(event);
@@ -20,12 +27,39 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const newChannel = await ChannelSchema.create({ name, description });
+  const userId = decoded.id;
 
-  //console.log(io);
-  if (io) {
-    io.emit("channel:new", newChannel);
+  let newChannel = null;
+
+  try {
+    newChannel = await ChannelSchema.create({
+      name,
+      description,
+      owner: userId,
+    });
+
+    await ChannelTextSchema.create({
+      name: "general",
+      channelId: newChannel._id,
+    });
+
+    await ChannelMembershipSchema.create({
+      userId,
+      channelId: newChannel._id,
+      channelRole: "owner",
+    });
+
+    return { success: true, channel: newChannel };
+  } catch {
+    if (newChannel?._id) {
+      await ChannelSchema.deleteOne({ _id: newChannel._id });
+      await ChannelText.deleteMany({ channelId: newChannel._id });
+      await ChannelMembershipSchema.deleteMany({ channelId: newChannel._id });
+    }
+
+    return createError({
+      statusCode: 500,
+      message: "Failed to create channel and its dependencies",
+    });
   }
-
-  return { success: true, channel: newChannel };
 });

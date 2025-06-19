@@ -1,4 +1,5 @@
 import { defineMongooseModel } from "#nuxt/mongoose";
+import mongoose from "mongoose";
 
 export const ChannelSchema = defineMongooseModel({
   name: "channel",
@@ -6,6 +7,16 @@ export const ChannelSchema = defineMongooseModel({
   schema: {
     name: { type: String, required: true },
     description: String,
-    createdAt: { type: Date, default: Date.now },
+
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
+    },
+
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
 });

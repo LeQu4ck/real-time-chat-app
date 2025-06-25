@@ -28,13 +28,13 @@
 
       <template #footer>
         <div class="dialog-footer-buttons">
-          <Button
+          <PrimevueBtn
             label="Log in"
             icon="pi pi-sign-in"
-            class="p-button-success"
+            severity="success"
             @click="logInAsync"
           />
-          <Button
+          <PrimevueBtn
             label="Close"
             icon="pi pi-times"
             severity="danger"
@@ -69,13 +69,13 @@
 
       <template #footer>
         <div class="dialog-footer-buttons">
-          <Button
+          <PrimevueBtn
             label="Sign up"
             icon="pi pi-user-plus"
             class="p-button-success"
             @click="signUpAsync"
           />
-          <Button
+          <PrimevueBtn
             label="Close"
             icon="pi pi-times"
             severity="danger"
@@ -89,10 +89,12 @@
 
 <script setup>
 import Dialog from "primevue/dialog";
+import PrimevueBtn from "primevue/button";
 import { ref } from "vue";
 import { useAuth } from "~/composables/useAuth";
+import { socket } from "~/components/sockets";
 
-const { user, logOut } = useAuth();
+const { user, fetchUser, logOut } = useAuth();
 
 const menuItems = ref([]);
 
@@ -210,9 +212,11 @@ const logInAsync = async () => {
     logInDialog.value = false;
 
     if (result && result.user) {
-      user.value = result.user;
+      await fetchUser();
+      socket.emit("user:login");
+
       buildMenu();
-      navigateTo("/home");
+      await navigateTo("/home");
     } else {
       console.error("Login failed, no user returned.");
     }
@@ -223,9 +227,12 @@ const logInAsync = async () => {
 
 const logOutAsync = async () => {
   try {
+    socket.emit("user:logout");
+
     await logOut();
 
     buildMenu();
+    await navigateTo("/");
   } catch (error) {
     console.error("Error logging out:", error);
   }
@@ -249,5 +256,12 @@ watch(user, buildMenu);
   display: flex;
   justify-content: flex- row;
   gap: 8px;
+}
+
+.dialog-footer-buttons > .p-button-success {
+  color: var(--surface-ground);
+}
+.dialog-footer-buttons > .p-button-danger {
+  color: var(--surface-ground);
 }
 </style>

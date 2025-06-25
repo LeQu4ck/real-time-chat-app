@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const channelId = getRouterParam(event, "channel-basic-info");
-  console.log(channelId);
+  //console.log(channelId);
 
   try {
     const channel = await ChannelSchema.find({

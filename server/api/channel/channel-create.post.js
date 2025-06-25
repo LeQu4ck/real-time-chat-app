@@ -17,14 +17,15 @@ export default defineEventHandler(async (event) => {
     return createError({ statusCode: 403, message: "Invalid token" });
   }
 
-  const body = await readBody(event);
-  const { name, description } = body;
+  const { name, description }  = await readBody(event);
+
+  console.log(name, description);
 
   if (!name) {
-    return {
+    return createError({
       statusCode: 400,
       message: "Channel name is required",
-    };
+    });
   }
 
   const userId = decoded.id;
@@ -53,7 +54,7 @@ export default defineEventHandler(async (event) => {
   } catch {
     if (newChannel?._id) {
       await ChannelSchema.deleteOne({ _id: newChannel._id });
-      await ChannelText.deleteMany({ channelId: newChannel._id });
+      await ChannelTextSchema.deleteMany({ channelId: newChannel._id });
       await ChannelMembershipSchema.deleteMany({ channelId: newChannel._id });
     }
 

@@ -4,6 +4,7 @@
       <PrimevueBtn
         icon="pi pi-plus"
         class="add-channel-button"
+        severity="success"
         @click="addChannelModal = true"
       />
       <div
@@ -70,7 +71,7 @@ const channelList = ref([]);
 
 const fetchChannels = async () => {
   try {
-    const response = await fetch(
+    const response = await $fetch(
       "http://localhost:3000/api/channel/channel-user",
       {
         method: "GET",
@@ -78,9 +79,7 @@ const fetchChannels = async () => {
       }
     );
 
-    const data = await response.json();
-
-    channelList.value = data.channels || [];
+    channelList.value = response.channels || [];
   } catch (error) {
     console.error("Error fetching channels:", error);
   }
@@ -105,7 +104,9 @@ const saveChannel = async () => {
       description: newChannelDescription.value,
     };
 
-    await fetch("http://localhost:3000/api/channel/channel-create", {
+    console.log(newChannel)
+
+    await $fetch("http://localhost:3000/api/channel/channel-create", {
       method: "POST",
       body: newChannel,
       credentials: "include",
@@ -165,7 +166,7 @@ onMounted(() => {
 
 .channels-list > .add-channel-button {
   cursor: pointer;
-  background-color: #58c489;
+  /* color: var(--surface-ground); */
 
   width: 48px;
   height: 48px;
@@ -179,7 +180,7 @@ onMounted(() => {
 }
 
 .channels-list > .add-channel-button:hover {
-  background-color: #4ab77a;
+  background-color: var(--success-color-hover);
   transform: scale(1.1);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
   border-color: #c3c3bb;

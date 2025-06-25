@@ -31,8 +31,12 @@
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 72px);
-  background: linear-gradient(145deg, #2a2430, #201c24);
-  color: #fff;
+  background: linear-gradient(
+    145deg,
+    var(--surface-ground),
+    var(--surface-section)
+  );
+  color: var(--text-color);
   padding: 2rem;
   margin-top: 4px;
 }

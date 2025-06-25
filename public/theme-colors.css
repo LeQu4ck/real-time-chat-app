@@ -1,0 +1,25 @@
+:root {
+  --surface-ground: #1c1c1c;
+  --surface-section: #373a3e;
+  --surface-card: #515b63;
+
+  --surface-border: #6a8086;
+
+  --primary-color: #86a7a6;
+  --primary-color-text: #1c1c1c;
+
+  --text-color: #e0e0e0;
+  --text-color-secondary: #a9cec2;
+  --text-color-tertiary: #6a8086;
+  --text-color-fill: #8685ef;
+
+  --success-color: #005a34;
+  --success-color-hover: #4ab77a;
+  --danger-color: #925867;
+
+  --highlight-bg: #a9cec2;
+  --highlight-text-color: #1c1c1c;
+
+  --input-bg: #373a3e;
+  --input-border: #6a8086;
+}

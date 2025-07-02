@@ -1,23 +1,20 @@
 import { ChannelSchema } from "~/server/models/channel";
 import { ChannelTextSchema } from "~/server/models/channel-text";
 import { ChannelMembershipSchema } from "~/server/models/channel-membership";
-import { getCookie } from "h3";
-import jwt from "jsonwebtoken";
+import checkUser from "~/server/utils/check-user";
+import { defineEventHandler, createError, readBody } from "h3";
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, "token");
-  if (!token) {
-    return createError({ statusCode: 401, message: "Not authenticated" });
+  const user = checkUser(event);
+
+  if (!user) {
+    return createError({
+      statusCode: 401,
+      message: "Not authenticated",
+    });
   }
 
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return createError({ statusCode: 403, message: "Invalid token" });
-  }
-
-  const { name, description }  = await readBody(event);
+  const { name, description } = await readBody(event);
 
   console.log(name, description);
 
@@ -27,16 +24,12 @@ export default defineEventHandler(async (event) => {
       message: "Channel name is required",
     });
   }
-
-  const userId = decoded.id;
-
   let newChannel = null;
-
   try {
     newChannel = await ChannelSchema.create({
       name,
       description,
-      owner: userId,
+      owner: user.id,
     });
 
     await ChannelTextSchema.create({
@@ -45,7 +38,7 @@ export default defineEventHandler(async (event) => {
     });
 
     await ChannelMembershipSchema.create({
-      userId,
+      userId: user.id,
       channelId: newChannel._id,
       channelRole: "owner",
     });

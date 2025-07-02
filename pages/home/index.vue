@@ -36,20 +36,10 @@
           }}
         </div>
         <div class="text-channel-messages">
-          <div
-            v-if="Object.keys(selectedTextChannel).length === 0"
-            class="message-list"
-          >
-            <div class="empty-message-placeholder">
-              <i
-                class="pi pi-comments"
-                style="font-size: 2rem; margin-bottom: 8px; color: #888"
-              />
-              <p>Please select a text channel to view messages.</p>
-            </div>
-          </div>
-
-          <div v-else class="message-list">aa</div>
+          <MessageList
+            :message-list="textChannelMessages"
+            :selected-text-channel="selectedTextChannel"
+          />
 
           <div class="text-input-area">
             <InputGroup>
@@ -59,7 +49,11 @@
                 name="textMessageContent"
               />
               <InputGroupAddon>
-                <PrimevueBtn icon="pi pi-send" severity="secondary" />
+                <PrimevueBtn
+                  icon="pi pi-send"
+                  severity="secondary"
+                  @click="sendMessageAsync"
+                />
               </InputGroupAddon>
             </InputGroup>
           </div>
@@ -110,8 +104,6 @@ const showToast = (toastProps) => {
   emit("show-toast", toastProps);
 };
 
-const textMessageContent = ref(null);
-
 const currentChannel = ref({});
 const channelInfo = async (channelId) => {
   try {
@@ -150,9 +142,11 @@ const getChannelTextChannels = async (channelId) => {
 };
 
 const selectedTextChannel = ref({});
-const openSelectedTextChannel = (textChannel) => {
-  console.log("Selected text channel ID:", textChannel);
+const openSelectedTextChannel = async (textChannel) => {
+  //console.log("Selected text channel ID:", textChannel);
   selectedTextChannel.value = textChannel;
+
+  await fetchTextChannelMessages(selectedTextChannel?.value?._id);
 };
 
 const channelMembers = ref({});
@@ -171,12 +165,6 @@ const fetchChannelMembers = async (channelId) => {
   } catch {
     console.error("Error fetching channel members:");
   }
-};
-
-const openSelectedChannel = async (channelId) => {
-  await channelInfo(channelId);
-  await getChannelTextChannels(channelId);
-  await fetchChannelMembers(channelId);
 };
 
 const handleUserStatusUpdate = (data) => {
@@ -199,13 +187,149 @@ const handleUserStatusUpdate = (data) => {
   }
 };
 
+const textMessageContent = ref(null);
+const sendMessageAsync = async () => {
+  if (!textMessageContent.value || textMessageContent.value.trim() === "") {
+    emit(
+      "show-toast",
+      updateToastProps(
+        "warn",
+        "Error sending message",
+        "Message content cannot be empty"
+      )
+    );
+
+    return;
+  }
+
+  try {
+    await $fetch("http://localhost:3000/api/channel/messages/create-message", {
+      method: "POST",
+      body: {
+        channelTextId: selectedTextChannel.value._id,
+        content: textMessageContent.value,
+      },
+      credentials: "include",
+    });
+
+    textMessageContent.value = "";
+  } catch {
+    emit(
+      "show-toast",
+      updateToastProps(
+        "danger",
+        "Couldn't send message",
+        "An error occured while trying to send the message"
+      )
+    );
+  }
+};
+
+const textChannelMessages = ref([]);
+const hasMoreMessages = ref(true);
+const isLoadingMessages = ref(false);
+const lastTextChannelId = ref('0');
+// const fetchTextChannelMessages = async (textChannelId) => {
+//   try {
+//     const response = await $fetch(
+//       `http://localhost:3000/api/channel/messages/channel-messages/${textChannelId}`
+//     );
+
+//     textChannelMessages.value = (await response.messages) || [];
+//   } catch {
+//     return console.error("Error fetching text channel messages");
+//   }
+// };
+const fetchTextChannelMessages = async (textChannelId) => {
+  if (!textChannelId) return;
+
+  const isNewChannel = textChannelId !== lastTextChannelId.value;
+
+  if (isNewChannel) {
+    textChannelMessages.value = [];
+    hasMoreMessages.value = true;
+    lastTextChannelId.value = textChannelId;
+  }
+
+  if (isLoadingMessages.value || !hasMoreMessages.value) return;
+
+  const oldestTimestamp = isNewChannel
+    ? undefined
+    : textChannelMessages.value.at(-1)?.createdAt;
+
+  isLoadingMessages.value = true;
+
+  try {
+    const response = await $fetch(
+      `http://localhost:3000/api/channel/messages/channel-messages/${textChannelId}`,
+      {
+        query: oldestTimestamp ? { before: oldestTimestamp } : {},
+      }
+    );
+
+    const newMessages = response?.messages || [];
+
+    if (isNewChannel) {
+      textChannelMessages.value = newMessages;
+    } else {
+      textChannelMessages.value = [
+        ...newMessages,
+        ...textChannelMessages.value,
+      ];
+    }
+
+    hasMoreMessages.value = newMessages.length === 20;
+
+    //console.log(textChannelMessages.value)
+  } catch (err) {
+    console.error("Error fetching messages:", err);
+  } finally {
+    isLoadingMessages.value = false;
+  }
+};
+
+const openSelectedChannel = async (channelId) => {
+  await channelInfo(channelId);
+  await getChannelTextChannels(channelId);
+  await fetchChannelMembers(channelId);
+  await fetchTextChannelMessages(selectedTextChannel?.value?._id);
+};
+
 onMounted(() => {
   socket.on("user:status", handleUserStatusUpdate);
+
+  watch(
+    () => selectedTextChannel?.value?._id,
+    (newChannelId, oldChannelId) => {
+      if (newChannelId) {
+        socket.emit("text-channel:leave", oldChannelId);
+        socket.off("text-channel:message");
+      }
+
+      if (newChannelId) {
+        socket.emit("text-channel:join", newChannelId);
+
+        socket.on("text-channel:message", (message) => {
+          //console.log("New message received:", message);
+          if (message.channelTextId === selectedTextChannel.value?._id) {
+            textChannelMessages.value.push(message);
+            //console.log(textChannelMessages.value)
+          }
+        });
+      }
+    },
+    { immediate: true }
+  );
 });
 
 onBeforeUnmount(() => {
   console.log("Cleaning up socket listeners");
   socket.off("user:status", handleUserStatusUpdate);
+
+  if (selectedTextChannel?.value?._id) {
+    socket.emit("text-channel:leave", selectedTextChannel.value._id);
+    socket.off("text-channel:message");
+  }
 });
 </script>
 
@@ -220,20 +344,20 @@ onBeforeUnmount(() => {
   height: calc(100vh - 72px);
   background: linear-gradient(145deg, #2a2430, #201c24);
   margin-top: 4px;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .content {
+  flex: 1 1 auto;
   display: flex;
-  flex-direction: row;
+  overflow: hidden;
 
-  justify-content: center;
-  height: 100%;
   color: #fff;
 }
 
 .channel-info-area {
-  flex-grow: 1;
+  flex: 0 0 15%;
+  max-width: 15%;
   border-right: #3c3c44 1px solid;
   border-top: #3c3c44 1px solid;
 
@@ -283,15 +407,10 @@ onBeforeUnmount(() => {
 .text-channel-messages {
   display: flex;
   flex-direction: column;
-  height: 90%;
+  height: 100%;
   overflow: hidden;
 
   padding: 16px;
-}
-
-.message-list {
-  flex: 1;
-  overflow-y: auto;
 }
 
 .text-input-area {
@@ -299,13 +418,20 @@ onBeforeUnmount(() => {
 }
 
 .messages-area {
-  flex-grow: 8;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 70%;
+  max-width: 70%;
+
   border-top: #3c3c44 1px solid;
   border-right: #3c3c44 1px solid;
+
+  position: relative;
 }
 
 .channel-members-area {
-  flex-grow: 1;
+  flex: 0 0 15%;
+  max-width: 15%;
   border-top: #3c3c44 1px solid;
   padding: 16px;
 }
@@ -334,6 +460,7 @@ onBeforeUnmount(() => {
 }
 
 .member-title {
+  margin-bottom: 2px;
 }
 
 .member-item {

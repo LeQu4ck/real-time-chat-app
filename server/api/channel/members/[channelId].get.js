@@ -1,22 +1,17 @@
 import { ChannelMembershipSchema } from "~/server/models/channel-membership";
+import checkUser from "~/server/utils/check-user";
 //import { UserSchema } from "~/server/models/user";
-import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, "token");
-  if (!token) {
-    return createError({ statusCode: 401, message: "Not authenticated" });
+  const user = checkUser(event);
+
+  if (!user) {
+    return createError({
+      statusCode: 401,
+      message: "Not authenticated",
+    });
   }
 
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return createError({ statusCode: 403, message: "Unauthorized" });
-  }
-  if (!decoded) {
-    return createError({ statusCode: 403, message: "Unauthorized" });
-  }
   const channelId = getRouterParam(event, "channelId");
   const onlineUsers = event.context.onlineUsers || new Map();
 

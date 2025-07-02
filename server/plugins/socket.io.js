@@ -7,19 +7,21 @@ const onlineUsers = new Map();
 
 export default defineNitroPlugin((nitroApp) => {
   const engine = new Engine();
-  const io = new Server();
+  const io = new Server(nitroApp.server, {
+    cors: {
+      origin: "*",
+    },
+  });
 
   io.bind(engine);
+
+  nitroApp.io = io;
 
   io.on("connection", (socket) => {
     console.log("A new client connected:", socket.id);
 
-    //const token = getCookie(socket.handshake.headers.cookie, "token");
-    //const token  = getCookie(socket, "token");
-
     const cookieHeader = socket.handshake.headers.cookie || "";
     const token = getCookieFromHeader(cookieHeader, "token");
-    //console.log("token", token);
 
     let userId = null;
     try {
@@ -30,18 +32,12 @@ export default defineNitroPlugin((nitroApp) => {
       return;
     }
 
-    //console.log("User ID from token:", userId);
     if (!onlineUsers.has(userId)) {
       onlineUsers.set(userId, new Set());
     }
     onlineUsers.get(userId).add(socket.id);
 
     io.emit("user:status", { userId, status: "online" });
-
-    socket.on("message", (data) => {
-      console.log("Message received:", data);
-      io.emit("message", data);
-    });
 
     socket.on("user:login", () => {
       io.emit("user:status", { userId, status: "online" });
@@ -67,6 +63,18 @@ export default defineNitroPlugin((nitroApp) => {
         onlineUsers.delete(userId);
         io.emit("user:status", { userId, status: "offline" });
       }
+    });
+
+    socket.on("text-channel:join", (channelId) => {
+      if (!channelId) return;
+      socket.join(`text-channel:${channelId}`);
+      //console.log(`User ${userId} joined text-channel:${channelId}`);
+    });
+
+    socket.on("text-channel:leave", (channelId) => {
+      if (!channelId) return;
+      socket.leave(`text-channel:${channelId}`);
+      //console.log(`User ${userId} left text-channel:${channelId}`);
     });
   });
 

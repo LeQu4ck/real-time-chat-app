@@ -1,22 +1,14 @@
-import { getCookie } from "h3";
-import jwt from "jsonwebtoken";
+import checkUser from "~/server/utils/check-user";
 import { ChannelSchema } from "~/server/models/channel";
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, "token");
-  if (!token) {
-    return createError({ statusCode: 401, message: "Not authenticated" });
-  }
+  const user = checkUser(event);
 
-  let decoded;
-  try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return createError({ statusCode: 403, message: "Invalid token" });
-  }
-
-  if (!decoded) {
-    return createError({ statusCode: 403, message: "Invalid token" });
+  if (!user) {
+    return createError({
+      statusCode: 401,
+      message: "Not authenticated",
+    });
   }
 
   const channelId = getRouterParam(event, "channel-basic-info");

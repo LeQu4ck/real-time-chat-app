@@ -1,25 +1,21 @@
-import { defineEventHandler, createError, getCookie } from "h3";
-import jwt from "jsonwebtoken";
+import { defineEventHandler, createError } from "h3";
 import { ChannelMembershipSchema } from "~/server/models/channel-membership";
+import checkUser from "~/server/utils/check-user";
 
 export default defineEventHandler(async (event) => {
-  const token = getCookie(event, "token");
+  const user = checkUser(event);
 
-  if (!token) {
-    return createError({ statusCode: 401, message: "Not authenticated" });
+  if (!user) {
+    return createError({
+      statusCode: 401,
+      message: "Not authenticated",
+    });
   }
 
-  let decoded;
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return createError({ statusCode: 403, message: "Invalid token" });
-  }
-
-  const userId = decoded.id;
-
-  try {
-    const userChannelsMembership = await ChannelMembershipSchema.find({ userId })
+    const userChannelsMembership = await ChannelMembershipSchema.find({
+      userId: user.id,
+    })
       .populate("channelId", "name description")
       .lean();
 

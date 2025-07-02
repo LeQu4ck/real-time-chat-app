@@ -3,14 +3,25 @@ import { defineMongooseModel } from "#nuxt/mongoose";
 
 export const ChannelMessageSchema = defineMongooseModel({
   name: "channel-message",
+
   schema: {
     messageBody: { type: String, required: true },
-    channelId: {
+    messageType:{
+        
+    },
+    senderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "channel",
+      ref: "user",
       required: true,
     },
-    createdAt: { type: Date, default: () => new Date() },
-    updatedAt: { type: Date, default: () => new Date() },
+    channelTextId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "channel-text",
+      required: true,
+    },
+  },
+
+  options: {
+    timestamps: true,
   },
 });

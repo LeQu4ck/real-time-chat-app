@@ -1,4 +1,5 @@
 import { UserSchema } from "~/server/models/user";
+import { defineEventHandler, readBody } from "h3";
 import bcrypt from "bcrypt";
 
 export default defineEventHandler(async (event) => {
@@ -15,7 +16,7 @@ export default defineEventHandler(async (event) => {
     return { statusCode: 409, message: "User already exists" };
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10)
+  const hashedPassword = await bcrypt.hash(password, 10);
   const user = await UserSchema.create({ email, password: hashedPassword });
 
   return { success: true, user: { id: user._id, username: user.username } };

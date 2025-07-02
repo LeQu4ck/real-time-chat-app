@@ -14,5 +14,5 @@ export default defineEventHandler(async (event) => {
     return createError({ statusCode: 403, message: "Invalid token" });
   }
 
-  console.log(decoded);
+  //console.log(decoded);
 });

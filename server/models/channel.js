@@ -14,9 +14,12 @@ export const ChannelSchema = defineMongooseModel({
       required: true,
     },
 
-    createdAt: {
-      type: Date,
-      default: Date.now,
+    uniqueJoinCode: {
+      type: String,
+      unique: true,
     },
+  },
+  options: {
+    timestamps: true,
   },
 });

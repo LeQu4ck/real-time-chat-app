@@ -8,12 +8,12 @@ export default defineEventHandler(async (event) => {
   const { email, password } = body;
 
   if (!email || !password) {
-    return { statusCode: 400, message: "Missing fields" };
+    throw createError({ statusCode: 400, message: "Missing fields" });
   }
 
   const existing = await UserSchema.findOne({ email });
   if (existing) {
-    return { statusCode: 409, message: "User already exists" };
+    throw createError({ statusCode: 409, message: "User already exists" });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

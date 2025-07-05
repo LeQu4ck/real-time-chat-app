@@ -26,7 +26,7 @@ export default defineNitroPlugin((nitroApp) => {
     let userId = null;
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      userId = decoded.id;
+      userId = decoded._id;
     } catch {
       socket.disconnect();
       return;
@@ -38,10 +38,6 @@ export default defineNitroPlugin((nitroApp) => {
     onlineUsers.get(userId).add(socket.id);
 
     io.emit("user:status", { userId, status: "online" });
-
-    socket.on("user:login", () => {
-      io.emit("user:status", { userId, status: "online" });
-    });
 
     socket.on("user:logout", () => {
       const userSockets = onlineUsers.get(userId);

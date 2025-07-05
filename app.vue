@@ -12,10 +12,10 @@ import "public/theme-colors.css";
 import NavigationClient from "./components/Navigation.client.vue";
 import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
-import { useAuth } from "~/composables/useAuth";
+//import { useAuth } from "~/composables/useAuth";
 import { socket } from "./components/sockets";
 
-const { fetchUser, user } = useAuth();
+const { user } = useAuth();
 const toast = useToast();
 
 const showToast = (toastProps) => {
@@ -29,7 +29,7 @@ const showToast = (toastProps) => {
 };
 
 onMounted(async () => {
-  await fetchUser();
+  //await fetchUser();
 
   if (user?.value?.email) {
     socket.on("connection", () => {

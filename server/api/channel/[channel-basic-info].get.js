@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const user = checkUser(event);
 
   if (!user) {
-    return createError({
+    throw createError({
       statusCode: 401,
       message: "Not authenticated",
     });
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
     return { success: true, channel: channel[0] };
   } catch {
-    return createError({
+    throw createError({
       statusCode: 500,
       message: "Error on fetching channel",
     });

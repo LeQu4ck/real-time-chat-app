@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const user = checkUser(event);
 
   if (!user) {
-    return createError({ statusCode: 401, message: "Not authenticated" });
+    throw createError({ statusCode: 401, message: "Not authenticated" });
   }
 
   const body = await readBody(event);
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   const message = await ChannelMessageSchema.create({
     messageBody: content,
     messageType: "text",
-    senderId: user.id,
+    senderId: user._id,
     channelTextId,
   });
 

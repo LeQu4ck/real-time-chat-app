@@ -9,11 +9,11 @@ export default defineEventHandler(async (event) => {
 
   const user = await UserSchema.findOne({ email });
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    return { statusCode: 401, message: "Invalid credentials" };
+    throw createError({ statusCode: 401, message: "Invalid credentials" });
   }
 
   const token = jwt.sign(
-    { id: user._id, email: user.email },
+    { _id: user._id, email: user.email },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
@@ -25,5 +25,8 @@ export default defineEventHandler(async (event) => {
     path: "/",
   });
 
-  return { success: true, user: { id: user._id, email: user.email } };
+  const io = useNitroApp().io;
+  io.emit("user:status", { userId: user._id, status: "online" });
+
+  return { success: true, user: { _id: user._id, email: user.email } };
 });

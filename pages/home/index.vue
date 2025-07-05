@@ -176,9 +176,9 @@ const handleUserStatusUpdate = (data) => {
     for (const role in channelMembers.value) {
       const members = channelMembers.value[role];
 
-      console.log(members);
-      const memberIndex = members.findIndex((member) => member.id === userId);
-      console.log("Member index:", memberIndex);
+      //console.log(members);
+      const memberIndex = members.findIndex((member) => member._id === userId);
+      //console.log("Member index:", memberIndex);
       if (memberIndex !== -1) {
         members[memberIndex].status = status;
         break;
@@ -229,17 +229,6 @@ const textChannelMessages = ref([]);
 const hasMoreMessages = ref(true);
 const isLoadingMessages = ref(false);
 const lastTextChannelId = ref('0');
-// const fetchTextChannelMessages = async (textChannelId) => {
-//   try {
-//     const response = await $fetch(
-//       `http://localhost:3000/api/channel/messages/channel-messages/${textChannelId}`
-//     );
-
-//     textChannelMessages.value = (await response.messages) || [];
-//   } catch {
-//     return console.error("Error fetching text channel messages");
-//   }
-// };
 const fetchTextChannelMessages = async (textChannelId) => {
   if (!textChannelId) return;
 

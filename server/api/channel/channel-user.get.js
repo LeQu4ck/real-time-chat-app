@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const user = checkUser(event);
 
   if (!user) {
-    return createError({
+    throw createError({
       statusCode: 401,
       message: "Not authenticated",
     });
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const userChannelsMembership = await ChannelMembershipSchema.find({
-      userId: user.id,
+      userId: user._id,
     })
       .populate("channelId", "name description")
       .lean();
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
       channels,
     };
   } catch {
-    return createError({
+    throw createError({
       statusCode: 500,
       message: "Failed to fetch user channels",
     });

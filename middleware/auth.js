@@ -1,11 +1,13 @@
+import { useAuth } from "~/composables/useAuth";
+
 export default defineNuxtRouteMiddleware(async () => {
-  const { user, fetchUser } = useAuth()
+  const { user } = useAuth();
 
+  // if (!user.value) {
+  //   await fetchUser()
+  // }
+  //console.log(user);
   if (!user.value) {
-    await fetchUser()
+    return navigateTo("/");
   }
-
-  if (!user.value) {
-    return navigateTo('/')
-  }
-})
+});

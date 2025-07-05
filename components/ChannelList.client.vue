@@ -5,7 +5,7 @@
         icon="pi pi-plus"
         class="add-channel-button"
         severity="success"
-        @click="addChannelModal = true"
+        @click="addOrCreateChannelModal = true"
       />
       <div
         v-for="channel in channelList"
@@ -18,39 +18,27 @@
       </div>
     </div>
 
-    <Dialog v-model:visible="addChannelModal" header="Welcome" modal>
-      <div class="p-4">
-        <h2>Add a new channel</h2>
-        <p>Here you can add a new channel to your list.</p>
-
-        <div class="new-channel-form">
-          <InputText
-            v-model="newChannelName"
-            placeholder="Enter channel name"
-            class="w-full mb-4"
-          />
-
-          <InputText
-            v-model="newChannelDescription"
-            placeholder="Enter channel description"
-            class="w-full mb-4"
-          />
-        </div>
+    <Dialog v-model:visible="addOrCreateChannelModal" header="Welcome" modal>
+      <div>
+        <ChannelAddOrCreate
+          ref="dialogChannelFormRef"
+          @dialog-save="onDialogSave"
+        />
       </div>
       <template #footer>
         <div class="dialog-footer-buttons">
           <PrimevueBtn
-            label="Add"
+            label="Save"
             icon="pi pi-check"
             class="p-button-success"
-            :loading="saveChannelLoading"
-            @click="saveChannel"
+            :loading="saveButtonLoadingState"
+            @click="handleAddOrCreateDialog"
           />
           <PrimevueBtn
             label="Close"
             icon="pi pi-times"
             severity="danger"
-            @click="addChannelModal = false"
+            @click="addOrCreateChannelModal = false"
           />
         </div>
       </template>
@@ -64,8 +52,6 @@ import PrimevueBtn from "primevue/button";
 import { updateToastProps } from "~/utils/utils";
 
 const emit = defineEmits(["show-toast", "selected-channel"]);
-
-const saveChannelLoading = ref(false);
 
 const channelList = ref([]);
 
@@ -85,51 +71,125 @@ const fetchChannels = async () => {
   }
 };
 
-const addChannelModal = ref(false);
+const addOrCreateChannelModal = ref(false);
+const dialogChannelFormRef = ref(null);
+const saveButtonLoadingState = ref(false);
 
-const newChannelName = ref("");
-const newChannelDescription = ref("");
+const onDialogSave = async (data) => {
+  if (data?.type === "add") {
+    //console.log(data);
+    await addChannel(data.channelCode);
+  }
 
-const saveChannel = async () => {
-  if (!newChannelName.value) {
-    alert("Please fill in the name.");
+  if (data?.type === "create") {
+    //console.log(data);
+    await saveChannel(data?.channelName, data?.channelDescription);
+  }
+};
+
+const saveChannel = async (name, description) => {
+  if (!name) {
+    emit(
+      "show-toast",
+      updateToastProps(
+        "warn",
+        "Missing name",
+        "Please add channel name before saving."
+      )
+    );
     return;
   }
 
   try {
-    saveChannelLoading.value = true;
+    saveButtonLoadingState.value = true;
 
     const newChannel = {
-      name: newChannelName.value,
-      description: newChannelDescription.value,
+      name,
+      description,
     };
 
-    console.log(newChannel)
+    console.log(newChannel);
 
-    await $fetch("http://localhost:3000/api/channel/channel-create", {
-      method: "POST",
-      body: newChannel,
-      credentials: "include",
-    });
-
-    await fetchChannels();
-
-    emit(
-      "show-toast",
-      updateToastProps(
-        "success",
-        "Channel Created",
-        "Channel has been created successfully."
-      )
+    const response = await $fetch(
+      "http://localhost:3000/api/channel/channel-create",
+      {
+        method: "POST",
+        body: newChannel,
+        credentials: "include",
+      }
     );
+
+    if (response?.statusCode === 201) {
+      await fetchChannels();
+
+      emit(
+        "show-toast",
+        updateToastProps(
+          "success",
+          "Channel Created",
+          "Channel has been created successfully."
+        )
+      );
+    }
   } catch (error) {
     console.error("Error saving channel:", error);
   } finally {
-    saveChannelLoading.value = false;
-    newChannelName.value = "";
-    newChannelDescription.value = "";
-    addChannelModal.value = false;
+    saveButtonLoadingState.value = false;
+    // newChannelName.value = "";
+    // newChannelDescription.value = "";
+    addOrCreateChannelModal.value = false;
   }
+};
+
+const addChannel = async (channelCode) => {
+  if (!channelCode) {
+    emit(
+      "show-toast",
+      updateToastProps(
+        "warn",
+        "Missing channel code",
+        "Please add channel code before saving."
+      )
+    );
+  }
+
+  try {
+    saveButtonLoadingState.value = true;
+
+    const response = await $fetch(
+      "http://localhost:3000/api/channel/join/channel-join-with-code",
+      {
+        method: "POST",
+        body: { channelCode: channelCode },
+        credentials: "include",
+      }
+    );
+
+    if (response.statusCode === 201) {
+      await fetchChannels();
+
+      emit(
+        "show-toast",
+        updateToastProps(
+          "success",
+          "Channel added",
+          "You've been added to the requested channel"
+        )
+      );
+    }
+  } catch {
+    emit(
+      "show-toast",
+      updateToastProps("error", "Error", "Failed to add channel")
+    );
+  } finally {
+    saveButtonLoadingState.value = false;
+    addOrCreateChannelModal.value = false;
+  }
+};
+
+const handleAddOrCreateDialog = () => {
+  dialogChannelFormRef.value?.handleSave();
 };
 
 const openChannelEmit = (value) => {
@@ -223,12 +283,6 @@ onMounted(() => {
 .dialog-footer-buttons {
   display: flex;
   justify-content: flex- row;
-  gap: 8px;
-}
-
-.new-channel-form {
-  display: flex;
-  flex-direction: column;
   gap: 8px;
 }
 </style>

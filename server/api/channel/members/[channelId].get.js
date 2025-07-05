@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const user = checkUser(event);
 
   if (!user) {
-    return createError({
+    throw createError({
       statusCode: 401,
       message: "Not authenticated",
     });
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
       .lean();
 
     if (!memberships || memberships.length === 0) {
-      return createError({
+      throw createError({
         statusCode: 403,
         statusMessage: "Not authorized to see members of this channel",
       });
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
       if (!grouped[role]) grouped[role] = [];
 
       grouped[role].push({
-        id: member.userId._id,
+        _id: member.userId._id,
         email: member.userId.email,
         status: onlineUsers.has(member.userId._id.toString())
           ? "online"

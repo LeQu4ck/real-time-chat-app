@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     '@primevue/nuxt-module',
     'nuxt-mongoose'
   ],
+  //ssr: true,
   mongoose: {
     uri: import.meta.env.MONGODB_URI,
     options: {},
@@ -28,5 +29,8 @@ export default defineNuxtConfig({
     experimental: {
       websocket: true
     },
-  }
+  },
+  plugins: [
+    '~/plugins/auth-init.client.js'
+  ]
 })

@@ -1,5 +1,7 @@
 import checkUser from "~/server/utils/check-user";
 import { ChannelMessageSchema } from "~/server/models/channel-message";
+import { ChannelMembershipSchema } from "~/server/models/channel-membership";
+import { ChannelTextSchema } from "~/server/models/channel-text";
 import { defineEventHandler, createError, readBody } from "h3";
 
 export default defineEventHandler(async (event) => {
@@ -10,11 +12,29 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event);
-  const { channelTextId, content } = body;
+  const { channelId, channelTextId, content } = body;
 
   console.log(channelTextId, content);
   if (!channelTextId || !content) {
     throw createError({ statusCode: 400, message: "Missing fields" });
+  }
+
+  const isUserJoined = await ChannelMembershipSchema.findOne({
+    userId: user._id,
+    channelId: channelId,
+  });
+
+  if (!isUserJoined) {
+    throw createError({ statusCode: 403, message: "Not authorized" });
+  }
+
+  const hasChannelTextChannel = await ChannelTextSchema.findOne({
+    _id: channelTextId,
+    channelId: channelId,
+  });
+
+  if (!hasChannelTextChannel) {
+    throw createError({ statusCode: 403, message: "Not authorized" });
   }
 
   const message = await ChannelMessageSchema.create({

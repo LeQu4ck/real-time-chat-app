@@ -58,7 +58,7 @@ const channelList = ref([]);
 const fetchChannels = async () => {
   try {
     const response = await $fetch(
-      "http://localhost:3000/api/channel/channel-user",
+      "/api/channel/channel-user",
       {
         method: "GET",
         credentials: "include",
@@ -111,7 +111,7 @@ const saveChannel = async (name, description) => {
     console.log(newChannel);
 
     const response = await $fetch(
-      "http://localhost:3000/api/channel/channel-create",
+      "/api/channel/channel-create",
       {
         method: "POST",
         body: newChannel,
@@ -157,7 +157,7 @@ const addChannel = async (channelCode) => {
     saveButtonLoadingState.value = true;
 
     const response = await $fetch(
-      "http://localhost:3000/api/channel/join/channel-join-with-code",
+      "/api/channel/join/channel-join-with-code",
       {
         method: "POST",
         body: { channelCode: channelCode },
@@ -192,8 +192,13 @@ const handleAddOrCreateDialog = () => {
   dialogChannelFormRef.value?.handleSave();
 };
 
+const lastCLickedChannel = ref(null);
 const openChannelEmit = (value) => {
-  emit("selected-channel", value);
+  if (value !== lastCLickedChannel.value) {
+    emit("selected-channel", value);
+
+    lastCLickedChannel.value = value;
+  }
 };
 
 onMounted(async () => {

@@ -32,5 +32,5 @@ export default defineNuxtConfig({
   },
   plugins: [
     '~/plugins/auth-init.client.js'
-  ]
+  ],
 })

@@ -174,7 +174,7 @@ const signUpAsync = async () => {
       password: password.value,
     };
 
-    await $fetch("http://localhost:3000/api/auth/register", {
+    await $fetch("/api/auth/register", {
       method: "POST",
       body: payload,
     });
@@ -200,7 +200,7 @@ const logInAsync = async () => {
       password: password.value,
     };
 
-    const result = await $fetch("http://localhost:3000/api/auth/login", {
+    const result = await $fetch("/api/auth/login", {
       method: "POST",
       body: payload,
       credentials: "include",

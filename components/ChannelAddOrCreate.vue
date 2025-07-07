@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="min-width: 32vw">
     <Tabs v-model:value="currentTab">
       <TabList>
         <Tab value="0">Add channel</Tab>
@@ -9,7 +9,7 @@
         <TabPanel value="0">
           <div class="p-4">
             <h2>Add a new channel</h2>
-            <p>Here you can add a new channel to your list.</p>
+            <!-- <p>Here you can add a new channel to your list.</p> -->
 
             <div class="channel-form">
               <InputText
@@ -23,7 +23,7 @@
         <TabPanel value="1">
           <div class="p-4">
             <h2>Create a new channel</h2>
-            <p>Here you can create a new channel.</p>
+            <!-- <p>Here you can create a new channel.</p> -->
 
             <div class="channel-form">
               <InputText

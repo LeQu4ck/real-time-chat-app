@@ -108,7 +108,7 @@ const currentChannel = ref({});
 const channelInfo = async (channelId) => {
   try {
     const response = await $fetch(
-      `http://localhost:3000/api/channel/${channelId}`,
+      `/api/channel/${channelId}`,
       {
         method: "GET",
         credentials: "include",
@@ -126,7 +126,7 @@ const textChannels = ref();
 const getChannelTextChannels = async (channelId) => {
   try {
     const response = await $fetch(
-      `http://localhost:3000/api/text-channels/${channelId}`,
+      `/api/text-channels/${channelId}`,
       {
         method: "GET",
         credentials: "include",
@@ -153,7 +153,7 @@ const channelMembers = ref({});
 const fetchChannelMembers = async (channelId) => {
   try {
     const response = await fetch(
-      `http://localhost:3000/api/channel/members/${channelId}`,
+      `/api/channel/members/${channelId}`,
       {
         method: "GET",
         credentials: "include",
@@ -203,9 +203,10 @@ const sendMessageAsync = async () => {
   }
 
   try {
-    await $fetch("http://localhost:3000/api/channel/messages/create-message", {
+    await $fetch("/api/channel/messages/create-message", {
       method: "POST",
       body: {
+        channelId: currentChannel.value._id,
         channelTextId: selectedTextChannel.value._id,
         content: textMessageContent.value,
       },
@@ -228,7 +229,7 @@ const sendMessageAsync = async () => {
 const textChannelMessages = ref([]);
 const hasMoreMessages = ref(true);
 const isLoadingMessages = ref(false);
-const lastTextChannelId = ref('0');
+const lastTextChannelId = ref("0");
 const fetchTextChannelMessages = async (textChannelId) => {
   if (!textChannelId) return;
 
@@ -250,7 +251,7 @@ const fetchTextChannelMessages = async (textChannelId) => {
 
   try {
     const response = await $fetch(
-      `http://localhost:3000/api/channel/messages/channel-messages/${textChannelId}`,
+      `/api/channel/messages/channel-messages/${textChannelId}`,
       {
         query: oldestTimestamp ? { before: oldestTimestamp } : {},
       }

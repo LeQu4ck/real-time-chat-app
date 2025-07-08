@@ -1,5 +1,5 @@
 import checkUser from "~/server/utils/check-user";
-import { ChannelMessageSchema } from "~/server/models/channel-message";
+import ChannelMessageSchema  from "~/server/models/channel-message";
 import { defineEventHandler, createError, getRouterParam } from "h3";
 
 export default defineEventHandler(async (event) => {

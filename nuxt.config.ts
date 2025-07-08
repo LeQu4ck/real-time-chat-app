@@ -9,15 +9,8 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxt/icon',
     '@primevue/nuxt-module',
-    'nuxt-mongoose'
   ],
   ssr: true,
-  mongoose: {
-    uri: process.env.MONGODB_URI,
-    options: {},
-    modelsDir: 'models',
-    devtools: true,
-  },
   primevue: {
     options: {
       theme: {
@@ -26,11 +19,26 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
+    preset: 'vercel',
     experimental: {
       websocket: true
     },
+    externals: {
+      external: [
+        "snappy",
+        "aws4",
+        "gcp-metadata",
+        "kerberos",
+        "mongodb-client-encryption",
+        "@aws-sdk/credential-providers"
+      ]
+    }
   },
   plugins: [
     '~/plugins/auth-init.client.js'
   ],
+
+  runtimeConfig: {
+    mongoUri: process.env.MONGODB_URI
+  }
 })

@@ -1,4 +1,4 @@
-import { ChannelMembershipSchema } from "~/server/models/channel-membership";
+import ChannelMembershipSchema from "~/server/models/channel-membership";
 import checkUser from "~/server/utils/check-user";
 //import { UserSchema } from "~/server/models/user";
 

@@ -1,13 +1,12 @@
 import mongoose from "mongoose";
-import { defineMongooseModel } from "#nuxt/mongoose";
 
-export const ChannelMessageSchema = defineMongooseModel({
-  name: "channel-message",
-
-  schema: {
+const ChannelMessageSchema = new mongoose.Schema(
+  {
     messageBody: { type: String, required: true },
-    messageType:{
-        
+    messageType: {
+      type: String,
+      enum: ["text", "image", "file"],
+      default: "text",
     },
     senderId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -20,8 +19,10 @@ export const ChannelMessageSchema = defineMongooseModel({
       required: true,
     },
   },
-
-  options: {
+  {
     timestamps: true,
-  },
-});
+  }
+);
+
+export default mongoose.models["channel-message"] ||
+  mongoose.model("channel-message", ChannelMessageSchema);

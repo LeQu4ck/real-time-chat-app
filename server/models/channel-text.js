@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
-import { defineMongooseModel } from "#nuxt/mongoose";
 
-export const ChannelTextSchema = defineMongooseModel({
-  name: "channel-text",
-  schema: {
+const ChannelTextSchema = new mongoose.Schema(
+  {
     name: { type: String, required: true },
     channelId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "channel",
       required: true,
     },
-    createdAt: { type: Date, default: () => new Date() },
   },
-});
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.models["channel-text"] ||
+  mongoose.model("channel-text", ChannelTextSchema);

@@ -1,10 +1,7 @@
-import { defineMongooseModel } from "#nuxt/mongoose";
 import mongoose from "mongoose";
 
-export const ChannelMembershipSchema = defineMongooseModel({
-  name: "channel-membership",
-
-  schema: {
+const ChannelMembershipSchema = new mongoose.Schema(
+  {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
@@ -25,8 +22,9 @@ export const ChannelMembershipSchema = defineMongooseModel({
       default: () => new Date(),
     },
   },
-
-  options: {
+  {
     timestamps: true,
-  },
-});
+  }
+);
+
+export default mongoose.models["channel-membership"] || mongoose.model("channel-membership", ChannelMembershipSchema);

@@ -1,5 +1,5 @@
 import checkUser from "~/server/utils/check-user";
-import { ChannelSchema } from "~/server/models/channel";
+import  ChannelSchema  from "~/server/models/channel";
 
 export default defineEventHandler(async (event) => {
   const user = checkUser(event);

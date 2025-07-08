@@ -1,5 +1,5 @@
 import { defineEventHandler, createError } from "h3";
-import { ChannelMembershipSchema } from "~/server/models/channel-membership";
+import  ChannelMembershipSchema  from "~/server/models/channel-membership";
 import checkUser from "~/server/utils/check-user";
 
 export default defineEventHandler(async (event) => {

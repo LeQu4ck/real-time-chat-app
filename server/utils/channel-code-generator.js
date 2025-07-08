@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { ChannelSchema } from "~/server/models/channel";
+import  ChannelSchema  from "~/server/models/channel";
 
 const generateChannelUniqueCode = async () => {
   let code, exists;

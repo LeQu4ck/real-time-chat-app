@@ -1,5 +1,5 @@
-import { ChannelMembershipSchema } from "~/server/models/channel-membership";
-import { ChannelSchema } from "~/server/models/channel";
+import ChannelMembershipSchema from "~/server/models/channel-membership";
+import ChannelSchema from "~/server/models/channel";
 import checkUser from "~/server/utils/check-user";
 import { defineEventHandler } from "h3";
 

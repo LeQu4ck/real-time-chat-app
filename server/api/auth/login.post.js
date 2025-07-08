@@ -1,4 +1,4 @@
-import { UserSchema } from "~/server/models/user";
+import UserSchema from '~/server/models/user'
 import bcrypt from "bcrypt";
 import { setCookie } from "h3";
 import jwt from "jsonwebtoken";

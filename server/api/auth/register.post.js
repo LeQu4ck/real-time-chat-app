@@ -1,4 +1,4 @@
-import { UserSchema } from "~/server/models/user";
+import UserSchema from '~/server/models/user'
 import { defineEventHandler, readBody } from "h3";
 import bcrypt from "bcrypt";
 

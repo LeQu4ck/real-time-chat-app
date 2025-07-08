@@ -1,4 +1,3 @@
-// server/api/auth/me.get.js
 import jwt from "jsonwebtoken";
 import { getCookie, getHeader } from "h3";
 

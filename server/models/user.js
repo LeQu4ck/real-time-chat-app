@@ -1,16 +1,18 @@
-import { defineMongooseModel } from "#nuxt/mongoose";
+import mongoose from "mongoose";
 
-export const UserSchema = new defineMongooseModel({
-  name: "user",
-
-  schema: {
-    email: String,
-    password: String,
-
+const UserSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
     },
   },
-});
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.models.User || mongoose.model("user", UserSchema);

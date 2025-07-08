@@ -1,7 +1,7 @@
 import checkUser from "~/server/utils/check-user";
-import { ChannelMessageSchema } from "~/server/models/channel-message";
-import { ChannelMembershipSchema } from "~/server/models/channel-membership";
-import { ChannelTextSchema } from "~/server/models/channel-text";
+import ChannelMessageSchema from "~/server/models/channel-message";
+import ChannelMembershipSchema from "~/server/models/channel-membership";
+import ChannelTextSchema from "~/server/models/channel-text";
 import { defineEventHandler, createError, readBody } from "h3";
 
 export default defineEventHandler(async (event) => {

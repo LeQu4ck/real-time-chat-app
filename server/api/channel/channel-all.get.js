@@ -1,4 +1,4 @@
-import { ChannelSchema } from "~/server/models/channel"
+import  ChannelSchema  from "~/server/models/channel"
 
 export default defineEventHandler(async () => {
 

@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     '@primevue/nuxt-module',
     'nuxt-mongoose'
   ],
-  //ssr: true,
+  ssr: true,
   mongoose: {
     uri: process.env.MONGODB_URI,
     options: {},

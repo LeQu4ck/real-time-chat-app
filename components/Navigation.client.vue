@@ -32,6 +32,7 @@
             label="Log in"
             icon="pi pi-sign-in"
             severity="success"
+            :loading="logInBtnLoading"
             @click="logInAsync"
           />
           <PrimevueBtn
@@ -73,6 +74,7 @@
             label="Sign up"
             icon="pi pi-user-plus"
             class="p-button-success"
+            :loading="signUpBtnLoading"
             @click="signUpAsync"
           />
           <PrimevueBtn
@@ -93,10 +95,13 @@ import PrimevueBtn from "primevue/button";
 import { ref } from "vue";
 import { useAuth } from "~/composables/useAuth";
 import { socket } from "~/components/sockets";
+import { updateToastProps } from "~/utils/utils.js";
 
 const { user, fetchUser, logOut } = useAuth();
 
 const menuItems = ref([]);
+
+const emit = defineEmits(["show-toast"]);
 
 const buildMenu = () => {
   menuItems.value = [
@@ -104,7 +109,7 @@ const buildMenu = () => {
       label: "Home",
       icon: "pi pi-home",
       command: () => {
-        navigateTo("/home");
+        navigateTo("/home2");
       },
     },
     ...(user.value
@@ -157,7 +162,10 @@ const buildMenu = () => {
 };
 
 const logInDialog = ref(false);
+const logInBtnLoading = ref(false);
+
 const signUpDialog = ref(false);
+const signUpBtnLoading = ref(false);
 
 const email = ref("");
 const password = ref("");
@@ -169,12 +177,14 @@ const signUpAsync = async () => {
   }
 
   try {
+    signUpBtnLoading.value = true;
+
     const payload = {
       email: email.value,
       password: password.value,
     };
 
-    await $fetch("/api/auth/register", {
+    const response = await $fetch("/api/auth/register", {
       method: "POST",
       body: payload,
     });
@@ -183,8 +193,37 @@ const signUpAsync = async () => {
     password.value = "";
 
     signUpDialog.value = false;
+
+    if (response.success) {
+      emit(
+        "show-toast",
+        updateToastProps(
+          "success",
+          "Account created",
+          "Your accound has been created."
+        )
+      );
+    }
   } catch (error) {
-    console.error("Error signing up:", error);
+    console.error("Error signing up:", error.message);
+
+    if (error?.statusCode === 409) {
+      emit(
+        "show-toast",
+        updateToastProps(
+          "error",
+          "Error creating account",
+          "This user already exists."
+        )
+      );
+    } else {
+      emit(
+        "show-toast",
+        updateToastProps("error", "Error", "An error has occured")
+      );
+    }
+  } finally {
+    signUpBtnLoading.value = false;
   }
 };
 
@@ -195,6 +234,8 @@ const logInAsync = async () => {
   }
 
   try {
+    logInBtnLoading.value = true;
+
     const payload = {
       email: email.value,
       password: password.value,
@@ -220,8 +261,17 @@ const logInAsync = async () => {
     } else {
       console.error("Login failed, no user returned.");
     }
-  } catch (error) {
-    console.error("Error logging in:", error);
+  } catch {
+    emit(
+      "show-toast",
+      updateToastProps(
+        "error",
+        "Error",
+        "Login failed. Check your credentials."
+      )
+    );
+  } finally {
+    logInBtnLoading.value = false;
   }
 };
 

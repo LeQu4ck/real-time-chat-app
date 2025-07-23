@@ -20,7 +20,7 @@
 
     <Dialog v-model:visible="addOrCreateChannelModal" header="Welcome" modal>
       <div>
-        <ChannelAddOrCreate
+        <ChannelJoinOrCreate
           ref="dialogChannelFormRef"
           @dialog-save="onDialogSave"
         />
@@ -233,8 +233,8 @@ onMounted(() => {
   cursor: pointer;
   /* color: var(--surface-ground); */
 
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
 
   border: 1px solid transparent;
@@ -260,8 +260,8 @@ onMounted(() => {
   flex-shrink: 0;
 
   padding: 8px 12px;
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background-color: #2d272f;
   gap: 8px;

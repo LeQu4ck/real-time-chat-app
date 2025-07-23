@@ -1,7 +1,7 @@
 <template>
   <div>
     <Toast />
-    <NavigationClient />
+    <NavigationClient @show-toast="showToast" />
     <NuxtPage @show-toast="showToast" />
   </div>
 </template>
@@ -10,7 +10,6 @@
 import "primeicons/primeicons.css";
 import "public/theme-colors.css";
 import NavigationClient from "./components/Navigation.client.vue";
-import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
 //import { useAuth } from "~/composables/useAuth";
 import { socket } from "./components/sockets";

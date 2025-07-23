@@ -2,18 +2,18 @@
   <div style="min-width: 32vw">
     <Tabs v-model:value="currentTab">
       <TabList>
-        <Tab value="0">Add channel</Tab>
+        <Tab value="0">Join channel</Tab>
         <Tab value="1">Create channel</Tab>
       </TabList>
       <TabPanels>
         <TabPanel value="0">
           <div class="p-4">
-            <h2>Add a new channel</h2>
+            <h2>Join a new channel</h2>
             <!-- <p>Here you can add a new channel to your list.</p> -->
 
             <div class="channel-form">
               <InputText
-                v-model="addChannelCode"
+                v-model="joinChannelCode"
                 placeholder="Enter channel code"
                 class="w-full mb-4"
               />
@@ -50,7 +50,7 @@ const emit = defineEmits(["dialog-save"]);
 
 const currentTab = ref("0");
 
-const addChannelCode = ref("");
+const joinChannelCode = ref("");
 
 const newChannelName = ref("");
 const newChannelDescription = ref("");
@@ -59,7 +59,7 @@ const handleSave = () => {
   if (currentTab.value === "0") {
     emit("dialog-save", {
       type: "add",
-      channelCode: addChannelCode.value,
+      channelCode: joinChannelCode.value,
     });
   }
 

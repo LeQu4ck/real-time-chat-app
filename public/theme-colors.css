@@ -1,5 +1,7 @@
 :root {
   --surface-ground: #1c1c1c;
+  --surface-lighter: #302a38;
+  --surface-drawer: #1e1e24;
   --surface-section: #373a3e;
   --surface-card: #515b63;
 
@@ -12,6 +14,11 @@
   --text-color-secondary: #a9cec2;
   --text-color-tertiary: #6a8086;
   --text-color-fill: #8685ef;
+  --text-color-muted: #c3c3bb;
+
+  --hover-color: #3c3535;
+
+  --border-primary: #3c3c44
 
   --success-color: #005a34;
   --success-color-hover: #4ab77a;

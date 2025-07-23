@@ -12,10 +12,10 @@
     </div>
   </div>
 
-  <div v-else class="scrollable-message-list">
-    <div class="message-list">
+  <div v-else ref="messageContainerRef" class="scrollable-message-list">
+    <div id="message-list-id" class="message-list">
       <div
-        v-for="message in messageList"
+        v-for="message in props.messageList"
         :key="message._id"
         class="message-item"
       >
@@ -34,15 +34,37 @@
 <script setup>
 import { formatMessageTime } from "~/utils/utils";
 
-defineProps({
+const props = defineProps({
   messageList: { type: Array, required: true },
   selectedTextChannel: { type: Object, required: true },
 });
+
+const messageContainerRef = ref(null);
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    const el = messageContainerRef?.value;
+    if (!el) return;
+
+    const shouldScroll = el.scrollHeight - el.scrollTop - el.clientHeight < 100; 
+
+    if (shouldScroll) {
+      el.scrollTop = el.scrollHeight;
+    }
+  });
+};
+
+onMounted(() => {
+  scrollToBottom();
+});
+
+watch(() => props.messageList.length, scrollToBottom);
 </script>
 
 <style scoped>
 .scrollable-message-list {
   flex: 1;
+  justify-content: center;
   overflow-y: auto;
   padding-right: 8px;
 }
@@ -50,6 +72,7 @@ defineProps({
 .message-list {
   flex: 1;
   overflow-y: hidden;
+  padding: 8px 16px;
 }
 
 .message-item {
@@ -63,7 +86,7 @@ defineProps({
 }
 
 .message-item-data {
-  color: var(--text-color-secondary);
+  color: var(--text-color-fill);
   font-size: 1.05rem;
   font-weight: bold;
 }

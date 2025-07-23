@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   try {
     const channel = await ChannelSchema.find({
       _id: channelId,
-    }).select("_id name description");
+    }).select("_id name description uniqueJoinCode");
 
     return { success: true, channel: channel[0] };
   } catch {

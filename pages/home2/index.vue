@@ -115,6 +115,7 @@
                     id="sendMessageButton"
                     icon="pi pi-send"
                     severity="secondary"
+                    :loading="sendingMessageLoading"
                     @click="sendMessageAsync"
                   />
                 </InputGroupAddon>
@@ -261,8 +262,11 @@ const handleUserStatusUpdate = (data) => {
 };
 
 const textMessageContent = ref(null);
+const sendingMessageLoading =ref(false);
 const sendMessageAsync = async () => {
-  if (!textMessageContent.value || textMessageContent.value.trim() === "") {
+  const trimmedMessage = textMessageContent.value?.trim();
+
+  if (!trimmedMessage || trimmedMessage === "") {
     emit(
       "show-toast",
       updateToastProps(
@@ -275,18 +279,21 @@ const sendMessageAsync = async () => {
     return;
   }
 
+  textMessageContent.value = "";
+  
   try {
+    sendingMessageLoading.value = true;
+
     await $fetch("/api/channel/messages/create-message", {
       method: "POST",
       body: {
         channelId: currentChannel.value._id,
         channelTextId: selectedTextChannel.value._id,
-        content: textMessageContent.value,
+        content: trimmedMessage,
       },
       credentials: "include",
     });
 
-    textMessageContent.value = "";
   } catch {
     emit(
       "show-toast",
@@ -296,6 +303,8 @@ const sendMessageAsync = async () => {
         "An error occured while trying to send the message"
       )
     );
+  } finally{
+    sendingMessageLoading.value = false;
   }
 };
 

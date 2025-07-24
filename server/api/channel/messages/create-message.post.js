@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { channelId, channelTextId, content } = body;
 
-  console.log(channelTextId, content);
+  //console.log(channelTextId, content);
   if (!channelTextId || !content) {
     throw createError({ statusCode: 400, message: "Missing fields" });
   }

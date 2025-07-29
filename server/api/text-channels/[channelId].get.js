@@ -2,7 +2,7 @@ import checkUser from "~/server/utils/check-user";
 import  ChannelTextSchema  from "~/server/models/channel-text";
 
 export default defineEventHandler(async (event) => {
-  const user = checkUser(event);
+  const user = await checkUser(event);
 
   if (!user) {
     return createError({

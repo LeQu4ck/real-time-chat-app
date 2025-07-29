@@ -3,7 +3,7 @@ import ChannelMessageSchema  from "~/server/models/channel-message";
 import { defineEventHandler, createError, getRouterParam } from "h3";
 
 export default defineEventHandler(async (event) => {
-  const user = checkUser(event);
+  const user = await checkUser(event);
 
   if (!user) {
     throw createError({

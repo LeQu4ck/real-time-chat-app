@@ -3,7 +3,7 @@ import  ChannelMembershipSchema  from "~/server/models/channel-membership";
 import checkUser from "~/server/utils/check-user";
 
 export default defineEventHandler(async (event) => {
-  const user = checkUser(event);
+  const user = await checkUser(event);
 
   if (!user) {
     throw createError({

@@ -30,7 +30,6 @@
           <PrimevueBtn
             label="Save"
             icon="pi pi-check"
-            class="p-button-success"
             :loading="saveButtonLoadingState"
             @click="handleAddOrCreateDialog"
           />

@@ -5,7 +5,7 @@ import ChannelTextSchema from "~/server/models/channel-text";
 import { defineEventHandler, createError, readBody } from "h3";
 
 export default defineEventHandler(async (event) => {
-  const user = checkUser(event);
+  const user = await checkUser(event);
 
   if (!user) {
     throw createError({ statusCode: 401, message: "Not authenticated" });

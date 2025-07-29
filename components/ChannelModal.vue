@@ -39,7 +39,7 @@ watch(
         items: [
           {
             label: newCh?.uniqueJoinCode,
-            icon: "pi pi-plus",
+            icon: "pi pi-user-plus",
             command: () => {
               navigator.clipboard.writeText(newCh?.uniqueJoinCode);
               emit(

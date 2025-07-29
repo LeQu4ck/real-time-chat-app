@@ -6,7 +6,7 @@ import { defineEventHandler, createError, readBody } from "h3";
 import generateChannelUniqueCode from "~/server/utils/channel-code-generator";
 
 export default defineEventHandler(async (event) => {
-  const user = checkUser(event);
+  const user = await checkUser(event);
 
   if (!user) {
     throw createError({

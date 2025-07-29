@@ -3,7 +3,7 @@ import checkUser from "~/server/utils/check-user";
 //import { UserSchema } from "~/server/models/user";
 
 export default defineEventHandler(async (event) => {
-  const user = checkUser(event);
+  const user = await checkUser(event);
 
   if (!user) {
     throw createError({

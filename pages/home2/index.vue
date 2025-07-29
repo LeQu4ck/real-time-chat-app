@@ -58,12 +58,26 @@
             </div>
 
             <div class="text-[#c3c3bb]">
-              <h3>Text channels</h3>
-              <div class="flex flex-col gap-1">
+              <div class="flex justify-between mb-4">
+                <p class="m-0 p-0 text-xl font-bold">Text channels</p>
+
+                <PrimevueBtn
+                  v-tooltip="'Create text channel'"
+                  icon="pi pi-plus"
+                  size="small"
+                  variant="text"
+                  rounded
+                  severity="secondary"
+                  aria-label="Create text channel"
+                  @click="createTextChannel"
+                />
+              </div>
+
+              <div class="flex flex-col gap-3">
                 <div
                   v-for="txt in textChannels"
                   :key="txt?._id"
-                  class="flex flex-row items-center gap-1"
+                  class="flex flex-row items-center gap-1 cursor-pointer rounded-sm hover:bg-[#3c3c44] px-2 py-1"
                   @click="openSelectedTextChannel(txt)"
                 >
                   <i class="pi pi-receipt" />
@@ -137,7 +151,7 @@
         >
           <div class="flex flex-col h-full">
             <div
-              class="border-t-0 border-r-0 border-b border-l-0 border-solid border-gray-300 pb-2 text-md"
+              class="mb-4 border-t-0 border-r-0 border-b border-l-0 border-solid border-gray-300 pb-2 text-md"
             >
               <p class="text-md">Members</p>
             </div>
@@ -147,7 +161,9 @@
                 :key="role"
                 class="flex flex-col gap-4"
               >
-                <h3 class="member-role">{{ role.toUpperCase() }}</h3>
+                <p class="m-0 p-0 text-xl font-bold">
+                  {{ role.toUpperCase() }}
+                </p>
 
                 <div
                   v-for="member in members"
@@ -168,6 +184,13 @@
         </div>
       </div>
     </div>
+    <CreateTextChannelModal
+      :open="isTextChannelModalOpen"
+      :channel-id="currentChannel._id"
+      @close-create-text-channel-modal="closeCreateTextChannelModal"
+      @refresh-channel-list="refreshTextChannelList"
+      @show-toast="showToast"
+    />
   </div>
 </template>
 
@@ -177,9 +200,9 @@ import PrimevueBtn from "primevue/button";
 //import ButtonGroup from "primevue/buttongroup";
 import { socket } from "~/components/sockets";
 
-// definePageMeta({
-//   middleware: ["auth"],
-// });
+definePageMeta({
+  middleware: ["auth"],
+});
 
 const emit = defineEmits(["show-toast"]);
 
@@ -262,7 +285,7 @@ const handleUserStatusUpdate = (data) => {
 };
 
 const textMessageContent = ref(null);
-const sendingMessageLoading =ref(false);
+const sendingMessageLoading = ref(false);
 const sendMessageAsync = async () => {
   const trimmedMessage = textMessageContent.value?.trim();
 
@@ -280,7 +303,7 @@ const sendMessageAsync = async () => {
   }
 
   textMessageContent.value = "";
-  
+
   try {
     sendingMessageLoading.value = true;
 
@@ -293,7 +316,6 @@ const sendMessageAsync = async () => {
       },
       credentials: "include",
     });
-
   } catch {
     emit(
       "show-toast",
@@ -303,7 +325,7 @@ const sendMessageAsync = async () => {
         "An error occured while trying to send the message"
       )
     );
-  } finally{
+  } finally {
     sendingMessageLoading.value = false;
   }
 };
@@ -428,6 +450,19 @@ const toggleLeft = () => {
 const toggleRight = () => {
   showRight.value = !showRight.value;
   if (showRight.value) showLeft.value = false;
+};
+
+const isTextChannelModalOpen = ref(false);
+const createTextChannel = () => {
+  isTextChannelModalOpen.value = true;
+};
+
+const closeCreateTextChannelModal = () => {
+  isTextChannelModalOpen.value = false;
+};
+
+const refreshTextChannelList = async () => {
+  await getChannelTextChannels(currentChannel?.value._id);
 };
 
 onBeforeUnmount(() => {

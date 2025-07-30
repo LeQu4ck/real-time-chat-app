@@ -109,7 +109,7 @@ const buildMenu = () => {
       label: "Home",
       icon: "pi pi-home",
       command: () => {
-        navigateTo("/home2");
+        navigateTo("/home");
       },
     },
     ...(user.value

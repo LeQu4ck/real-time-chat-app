@@ -19,12 +19,14 @@
         :key="message._id"
         class="message-item"
       >
-        <div class="message-item-data">
-          {{ message.senderId.email }}
-          <span style="font-size: 0.7rem; color: var(--text-color-tertiary)">
-            {{ formatMessageTime(message.createdAt) }}</span
+        <div class="flex flex-row items-center gap-2 mb-2">
+          <UserServerBubble :user-data="message.senderId" />
+
+          <div class="flex flex-row items-center justify-center text-xs text-[#6a8086]">
+            {{ formatMessageTime(message.createdAt) }}</div
           >
         </div>
+
         <div class="message-item-content">{{ message.messageBody }}</div>
       </div>
     </div>
@@ -32,8 +34,6 @@
 </template>
 
 <script setup>
-import { formatMessageTime } from "~/utils/utils";
-
 const props = defineProps({
   messageList: { type: Array, required: true },
   selectedTextChannel: { type: Object, required: true },
@@ -46,7 +46,7 @@ const scrollToBottom = () => {
     const el = messageContainerRef?.value;
     if (!el) return;
 
-    const shouldScroll = el.scrollHeight - el.scrollTop - el.clientHeight < 100; 
+    const shouldScroll = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
 
     if (shouldScroll) {
       el.scrollTop = el.scrollHeight;

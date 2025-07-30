@@ -1,36 +1,26 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper flex flex-col">
     <ChannelList
       @show-toast="showToast"
       @selected-channel="openSelectedChannel"
     />
-    <div v-if="Object.keys(currentChannel).length > 0" class="page-content">
-      <div class="channel-info-area">
-        <div class="channel-description">
-          <ChannelModal
-            :channel-data="currentChannel"
-            @show-toast="showToast" 
-          />
-        </div>
 
-        <div class="text-channels-area">
-          <h3>Text channels</h3>
-          <div class="text-channels">
-            <div
-              v-for="txt in textChannels"
-              :key="txt?._id"
-              class="text-channel"
-              @click="openSelectedTextChannel(txt)"
-            >
-              <i class="pi pi-receipt" />
-              {{ txt?.name }}
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="messages-area">
-        <div class="text-channel-info">
+    <div
+      v-if="currentChannel.name"
+      class="flex flex-col w-full h-full overflow-hidden"
+    >
+      <div
+        class="flex items-center justify-between border-t border-r border-b-0 border-l border-solid border-[#3c3c44] p-2 xl:hidden"
+      >
+        <PrimevueBtn
+          icon="pi pi-objects-column"
+          severity="help"
+          rounded
+          size="small"
+          @click="toggleLeft"
+        />
+
+        <div class="flex flex-row items-center justify-center gap-2 w-full p-4">
           <i v-if="selectedTextChannel?.name" class="pi pi-receipt" />
           {{
             selectedTextChannel?.name
@@ -38,68 +28,175 @@
               : "Select a text channel"
           }}
         </div>
-        <div class="text-channel-messages">
-          <MessageList
-            :message-list="textChannelMessages"
-            :selected-text-channel="selectedTextChannel"
-          />
 
-          <div class="text-input-area">
-            <InputGroup>
-              <Textarea
-                v-model="textMessageContent"
-                placeholder="Text here"
-                name="textMessageContent"
-                rows="1"
-                style="resize: none; width: 100%"
-                @focus="attachEnterKeyListener"
-                @blur="detachEnterKeyListener"
-              />
-              <InputGroupAddon>
-                <PrimevueBtn
-                  id="sendMessageButton"
-                  icon="pi pi-send"
-                  severity="secondary"
-                  @click="sendMessageAsync"
-                />
-              </InputGroupAddon>
-            </InputGroup>
-          </div>
-        </div>
+        <PrimevueBtn
+          icon="pi pi-users"
+          severity="help"
+          rounded
+          size="small"
+          @click="toggleRight"
+        />
       </div>
-      <div class="channel-members-area">
-        <div class="members-description pb-2 text-md">
-          <p>Members</p>
-        </div>
-        <div class="members-list">
-          <div
-            v-for="(members, role) in channelMembers"
-            :key="role"
-            class="member-group"
-          >
-            <h4 class="member-role">{{ role.toUpperCase() }}</h4>
 
+      <div class="flex flex-1 overflow-hidden relative">
+        <!-- first column -->
+        <div
+          :class="[
+            'p-4 absolute left-0 xl:relative z-10 bg-[#302a38] h-full transition-transform duration-300 ease-in-out',
+            showLeft
+              ? 'translate-x-0 w-full sm:w-1/2 lg:w-1/3 ml-0'
+              : '-translate-x-full',
+            'xl:block xl:translate-x-0 xl:w-1/6 xl:bg-transparent',
+            'border-t border-r-0 border-b-0 border-l border-solid rounded-r-xl xl:rounded-none border-[#3c3c44] overflow-y-auto',
+          ]"
+        >
+          <div class="flex flex-col h-full">
             <div
-              v-for="member in members"
-              :key="member._id"
-              class="member-item"
+              class="mb-4 border-t-0 border-r-0 border-b border-l-0 border-solid border-gray-300"
             >
-              <div>
-                <i class="pi pi-user" /> <span>{{ member.email }}</span>
+              <ChannelModal :channel-data="currentChannel" />
+            </div>
+
+            <div class="text-[#c3c3bb]">
+              <div class="flex justify-between mb-4">
+                <p class="m-0 p-0 text-xl font-bold">Text channels</p>
+
+                <PrimevueBtn
+                  v-tooltip="'Create text channel'"
+                  icon="pi pi-plus"
+                  size="small"
+                  variant="text"
+                  rounded
+                  severity="secondary"
+                  aria-label="Create text channel"
+                  @click="createTextChannel"
+                />
               </div>
 
-              <span> {{ member.status }}</span>
+              <div class="flex flex-col gap-3">
+                <div
+                  v-for="txt in textChannels"
+                  :key="txt?._id"
+                  class="flex flex-row items-center gap-1 cursor-pointer rounded-sm hover:bg-[#3c3c44] px-2 py-1"
+                  :class="{
+                    'bg-[#3c3c44]': selectedTextChannel?._id === txt?._id,
+                  }"
+                  @click="openSelectedTextChannel(txt)"
+                >
+                  <i class="pi pi-receipt" />
+                  {{ txt?.name }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- middle column -->
+        <div
+          :class="[
+            'flex-1 h-full w-full overflow-y-auto transition-all duration-300',
+            'xl:block',
+            'border-t border-r border-b-0 border-l border-solid border-[#3c3c44]',
+          ]"
+        >
+          <div class="h-full w-full flex flex-col">
+            <div
+              class="hidden xl:flex items-center justify-center gap-2 border-t-0 border-r-0 border-b border-l-0 border-solid border-[#3c3c44] w-full p-4"
+            >
+              <i v-if="selectedTextChannel?.name" class="pi pi-receipt" />
+              {{
+                selectedTextChannel?.name
+                  ? selectedTextChannel?.name
+                  : "Select a text channel"
+              }}
+            </div>
+
+            <MessageList
+              :message-list="textChannelMessages"
+              :selected-text-channel="selectedTextChannel"
+            />
+
+            <div class="px-8 py-2">
+              <InputGroup>
+                <Textarea
+                  v-model="textMessageContent"
+                  placeholder="Text here"
+                  name="textMessageContent"
+                  rows="1"
+                  style="resize: none; width: 100%"
+                  @focus="attachEnterKeyListener"
+                  @blur="detachEnterKeyListener"
+                />
+                <InputGroupAddon>
+                  <PrimevueBtn
+                    id="sendMessageButton"
+                    icon="pi pi-send"
+                    severity="secondary"
+                    :loading="sendingMessageLoading"
+                    @click="sendMessageAsync"
+                  />
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
+          </div>
+        </div>
+
+        <!-- third column -->
+        <div
+          :class="[
+            'p-4 absolute right-0 xl:relative z-10 bg-[#302a38] h-full transition-transform duration-300 ease-in-out',
+            showRight
+              ? 'translate-x-0 w-full sm:w-1/2 lg:w-1/3 mr-0'
+              : 'translate-x-full',
+            'xl:block xl:translate-x-0 xl:w-1/6 xl:bg-transparent',
+            'border-t border-r-0 border-b-0 border-l border-solid rounded-l-xl xl:rounded-none border-[#3c3c44] overflow-y-auto break-words',
+          ]"
+        >
+          <div class="flex flex-col h-full">
+            <div
+              class="mb-4 border-t-0 border-r-0 border-b border-l-0 border-solid border-gray-300 pb-2 text-md"
+            >
+              <p class="text-md">Members</p>
+            </div>
+            <div class="flex flex-col text-[#c3c3bb]">
+              <div
+                v-for="(members, role) in channelMembers"
+                :key="role"
+                class="flex flex-col gap-4 mb-4"
+              >
+                <p class="m-0 p-0 text-xl font-bold">
+                  {{ role.toUpperCase() }}
+                </p>
+
+                <div
+                  v-for="member in members"
+                  :key="member._id"
+                  class="flex flex-col gap-8"
+                >
+                  <div class="flex flex-col gap-2">
+                    <UserServerBubble :user-data="member" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <CreateTextChannelModal
+      :open="isTextChannelModalOpen"
+      :channel-id="currentChannel._id"
+      @close-create-text-channel-modal="closeCreateTextChannelModal"
+      @refresh-channel-list="refreshTextChannelList"
+      @show-toast="showToast"
+    />
   </div>
 </template>
 
 <script setup>
 import { Textarea } from "#components";
 import PrimevueBtn from "primevue/button";
+//import ButtonGroup from "primevue/buttongroup";
 import { socket } from "~/components/sockets";
 
 definePageMeta({
@@ -187,8 +284,11 @@ const handleUserStatusUpdate = (data) => {
 };
 
 const textMessageContent = ref(null);
+const sendingMessageLoading = ref(false);
 const sendMessageAsync = async () => {
-  if (!textMessageContent.value || textMessageContent.value.trim() === "") {
+  const trimmedMessage = textMessageContent.value?.trim();
+
+  if (!trimmedMessage || trimmedMessage === "") {
     emit(
       "show-toast",
       updateToastProps(
@@ -201,18 +301,20 @@ const sendMessageAsync = async () => {
     return;
   }
 
+  textMessageContent.value = "";
+
   try {
+    sendingMessageLoading.value = true;
+
     await $fetch("/api/channel/messages/create-message", {
       method: "POST",
       body: {
         channelId: currentChannel.value._id,
         channelTextId: selectedTextChannel.value._id,
-        content: textMessageContent.value,
+        content: trimmedMessage,
       },
       credentials: "include",
     });
-
-    textMessageContent.value = "";
   } catch {
     emit(
       "show-toast",
@@ -222,6 +324,8 @@ const sendMessageAsync = async () => {
         "An error occured while trying to send the message"
       )
     );
+  } finally {
+    sendingMessageLoading.value = false;
   }
 };
 
@@ -329,7 +433,36 @@ const handleKeyPress = async (event) => {
   }
 };
 
-watchEffect(() => currentChannel)
+watchEffect(() => currentChannel);
+
+// const showLeft = ref(false);
+// const showRight = ref(false);
+
+const showLeft = ref(false);
+const showRight = ref(false);
+
+const toggleLeft = () => {
+  showLeft.value = !showLeft.value;
+  if (showLeft.value) showRight.value = false;
+};
+
+const toggleRight = () => {
+  showRight.value = !showRight.value;
+  if (showRight.value) showLeft.value = false;
+};
+
+const isTextChannelModalOpen = ref(false);
+const createTextChannel = () => {
+  isTextChannelModalOpen.value = true;
+};
+
+const closeCreateTextChannelModal = () => {
+  isTextChannelModalOpen.value = false;
+};
+
+const refreshTextChannelList = async () => {
+  await getChannelTextChannels(currentChannel?.value._id);
+};
 
 onBeforeUnmount(() => {
   console.log("Cleaning up socket listeners");
@@ -344,156 +477,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .wrapper {
-  display: flex;
-  flex-direction: column;
-
-  gap: 24px;
   /* align-items: center;
   justify-content: center; */
+  width: 100%;
   height: calc(100vh - 72px);
   background: linear-gradient(145deg, #2a2430, #201c24);
   margin-top: 4px;
   overflow: hidden;
-}
-
-.page-content {
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-
-  height: 100%;
-
-  color: #fff;
-}
-
-.channel-info-area {
-  width: 240px;
-  border-right: #3c3c44 1px solid;
-  border-top: #3c3c44 1px solid;
-
-  padding: 16px;
-}
-
-.channel-description {
-  border-bottom: #fff 1px solid;
-}
-
-.text-channels-area {
-  color: #c3c3bb;
-}
-
-.text-channels {
-  display: flex;
-  flex-direction: column;
-
-  gap: 8px;
-}
-
-.text-channel {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-
-  padding: 4px;
-  border-radius: 4px;
-
-  cursor: pointer;
-}
-
-.text-channel:hover {
-  background-color: #3c3c44;
-}
-
-.text-channel-info {
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-
-  border-bottom: #3c3c44 1px solid;
-  padding: 16px;
-}
-
-.text-channel-messages {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-
-  padding: 16px;
-}
-
-.text-input-area {
-  background-color: #1e1b22;
-  width: 100%;
-}
-
-.messages-area {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-
-  border-top: #3c3c44 1px solid;
-  border-right: #3c3c44 1px solid;
-
-  position: relative;
-}
-
-.channel-members-area {
-  width: 240px;
-  border-top: #3c3c44 1px solid;
-  padding: 16px;
-}
-
-.members-description {
-  border-bottom: #fff 1px solid;
-}
-
-.members-list {
-  display: flex;
-  flex-direction: column;
-
-  gap: 8px;
-
-  margin-top: 16px;
-  color: #c3c3bb;
-}
-
-.member-group {
-  margin-bottom: 8px;
-}
-
-.member-role {
-  text-transform: uppercase;
-  font-weight: bold;
-}
-
-.member-title {
-  margin-bottom: 2px;
-}
-
-.member-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  padding: 4px;
-  border-radius: 4px;
-
-  cursor: pointer;
-}
-
-.member-item:hover {
-  background-color: #3c3c44;
-}
-
-@media (max-width: 1280px) {
-  .channel-info-area {
-    display: none;
-  }
-
-  .channel-members-area {
-    display: none;
-  }
 }
 </style>
